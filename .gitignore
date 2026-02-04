@@ -1,0 +1,5 @@
+# Gemini CLI Docker
+credentials/
+.env
+*.log
+node_modules/

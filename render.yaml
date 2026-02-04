@@ -1,0 +1,22 @@
+# render.yaml - Render Blueprint for Gemini CLI Web Service
+
+services:
+  - type: web
+    name: gemini-cli-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    
+    # Health check
+    healthCheckPath: /health
+    
+    # Environment Variables
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false  # Set manually in Render Dashboard
+      - key: PORT
+        value: 10000
+    
+    # Auto-deploy on push
+    autoDeploy: true

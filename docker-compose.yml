@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  gemini-cli:
+    build: .
+    container_name: gemini-cli
+
+    # =============================================
+    # AUTHENTICATION OPTIONS (Choose ONE method)
+    # =============================================
+
+    environment:
+      # METHOD 1: API Key (Simplest - works with free tier too)
+      # Get from: https://aistudio.google.com/app/apikey
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+
+      # METHOD 2: Service Account (Best for production)
+      # Create at: https://console.cloud.google.com/iam-admin/serviceaccounts
+      - GOOGLE_APPLICATION_CREDENTIALS=/home/gemini/.config/gcloud/service-account.json
+      # METHOD 3: Pre-authenticated OAuth (Uses your Pro subscription)
+      # Requires running `gemini` locally first to generate tokens
+      # Tokens are mounted from ./credentials/.gemini
+
+    volumes:
+      # Mount pre-authenticated OAuth tokens (for Google Pro subscription)
+      - ./credentials/.gemini:/home/gemini/.gemini:ro
+
+      # Mount service account key (for METHOD 2)
+      - ./credentials/service-account.json:/home/gemini/.config/gcloud/service-account.json:ro
+
+      # Mount your project files for context
+      - ./workspace:/home/gemini/workspace:ro
+
+    # Interactive mode
+    stdin_open: true
+    tty: true
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  # Optional: Run as a web service with API
+  gemini-api:
+    build: .
+    container_name: gemini-api
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+    volumes:
+      - ./credentials/.gemini:/home/gemini/.gemini:ro
+    ports:
+      - "8080:8080"
+    # Override to run in non-interactive/headless mode
+    command: [ "--non-interactive", "--port", "8080" ]
+    profiles:
+      - api # Only starts with: docker compose --profile api up
