@@ -61,20 +61,21 @@ app.get('/version', (req, res) => {
 
 // Send prompt to Gemini CLI (non-interactive mode)
 app.post('/prompt', async (req, res) => {
+    console.log(`📨 POST /prompt received. Body:`, req.body);
     const { prompt, timeout = 60000 } = req.body;
 
     if (!prompt) {
         return res.status(400).json({ error: 'prompt is required' });
     }
 
-    // Check for API key
-    if (!process.env.GEMINI_API_KEY) {
-        return res.status(500).json({ error: 'GEMINI_API_KEY not configured' });
-    }
+    // Auth is handled by either env var or ~/.gemini/oauth_creds.json
+    // We let the CLI command fail if neither is present.
 
     try {
         // Run gemini in non-interactive mode
-        const child = spawn('gemini', ['-p', prompt], {
+        // Assuming 'gemini <prompt>' works
+        console.log(`Running: gemini "${prompt}"`);
+        const child = spawn('gemini', [prompt], {
             env: { ...process.env },
             timeout: timeout
         });
