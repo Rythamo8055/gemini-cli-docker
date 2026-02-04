@@ -1,4 +1,4 @@
-# render.yaml - Render Blueprint for Gemini CLI Web Service
+# render.yaml - Render Blueprint
 
 services:
   - type: web
@@ -8,15 +8,18 @@ services:
     plan: free
     region: oregon
     
-    # Health check
     healthCheckPath: /health
-    
-    # Environment Variables
+    autoDeploy: true
+
     envVars:
-      - key: GEMINI_API_KEY
-        sync: false  # Set manually in Render Dashboard
       - key: PORT
         value: 10000
-    
-    # Auto-deploy on push
-    autoDeploy: true
+        
+      # OPTION A: API Key (Easiest)
+      - key: GEMINI_API_KEY
+        sync: false
+        
+      # OPTION B: Google Login (For Pro Subscription)
+      # Run `node get-login-token.js` locally and paste result here
+      - key: GOOGLE_CREDENTIALS_JSON
+        sync: false

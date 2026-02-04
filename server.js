@@ -2,8 +2,30 @@
 const express = require('express');
 const { spawn } = require('child_process');
 
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+
 const app = express();
 const PORT = process.env.PORT || 10000;
+
+// ==========================================
+// AUTO-AUTH: Restore Google Login from Env
+// ==========================================
+try {
+    if (process.env.GOOGLE_CREDENTIALS_JSON) {
+        console.log('🔐 Restoring Google OAuth credentials from environment variable...');
+        const geminiDir = path.join(os.homedir(), '.gemini');
+        if (!fs.existsSync(geminiDir)) fs.mkdirSync(geminiDir, { recursive: true });
+
+        // Write the credentials file
+        const credsPath = path.join(geminiDir, 'oauth_creds.json');
+        fs.writeFileSync(credsPath, process.env.GOOGLE_CREDENTIALS_JSON);
+        console.log('✅ Credentials restored successfully!');
+    }
+} catch (error) {
+    console.error('❌ Failed to restore credentials:', error.message);
+}
 
 app.use(express.json());
 
