@@ -53,9 +53,37 @@ app.get('/', (req, res) => {
         endpoints: {
             '/health': 'Health check',
             '/prompt': 'POST - Send prompt to Gemini CLI',
-            '/version': 'GET - Gemini CLI version'
+            '/version': 'GET - Gemini CLI version',
+            '/debug': 'GET - Debug auth config'
         }
     });
+});
+
+// Debug endpoint - check auth configuration
+app.get('/debug', (req, res) => {
+    const geminiDir = path.join(os.homedir(), '.gemini');
+    const credsPath = path.join(geminiDir, 'oauth_creds.json');
+    const settingsPath = path.join(geminiDir, 'settings.json');
+
+    const result = {
+        envVarPresent: !!process.env.GOOGLE_CREDENTIALS_JSON,
+        envVarLength: process.env.GOOGLE_CREDENTIALS_JSON?.length || 0,
+        geminiDir: geminiDir,
+        geminiDirExists: fs.existsSync(geminiDir),
+        oauthCredsExists: fs.existsSync(credsPath),
+        settingsExists: fs.existsSync(settingsPath),
+        settingsContent: null
+    };
+
+    if (result.settingsExists) {
+        try {
+            result.settingsContent = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+        } catch (e) {
+            result.settingsContent = 'ERROR: ' + e.message;
+        }
+    }
+
+    res.json(result);
 });
 
 // Get Gemini CLI version
