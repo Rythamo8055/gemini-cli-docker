@@ -18,10 +18,22 @@ try {
         const geminiDir = path.join(os.homedir(), '.gemini');
         if (!fs.existsSync(geminiDir)) fs.mkdirSync(geminiDir, { recursive: true });
 
-        // Write the credentials file
+        // Write the OAuth token file
         const credsPath = path.join(geminiDir, 'oauth_creds.json');
         fs.writeFileSync(credsPath, process.env.GOOGLE_CREDENTIALS_JSON);
-        console.log('✅ Credentials restored successfully!');
+        console.log('✅ Credentials restored to:', credsPath);
+
+        // ALSO write settings.json to tell CLI to use OAuth
+        const settingsPath = path.join(geminiDir, 'settings.json');
+        const settingsContent = JSON.stringify({
+            security: {
+                auth: {
+                    selectedType: "oauth-personal"
+                }
+            }
+        }, null, 2);
+        fs.writeFileSync(settingsPath, settingsContent);
+        console.log('✅ Settings restored to:', settingsPath);
     }
 } catch (error) {
     console.error('❌ Failed to restore credentials:', error.message);
